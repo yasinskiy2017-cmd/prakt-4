@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:MovieCatalogApp.Models"
+             xmlns:vm="clr-namespace:MovieCatalogApp.ViewModels"
+             x:Class="MovieCatalogApp.MainPage"
+             x:DataType="vm:MainPageModel"
+             Title="Кінокаталог IMDb"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="12" RowSpacing="8">
+
+        <!-- Заголовок сторінки та кнопка оновлення -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="10">
+            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                <Label Text="Каталог фільмів IMDb"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextColor}" />
+                <Label Text="{Binding StatusMessage}"
+                       FontSize="12"
+                       TextColor="#64748B" />
+            </VerticalStackLayout>
+
+            <Button Grid.Column="1"
+                    Text="Оновити"
+                    Command="{Binding LoadInitialMoviesCommand}"
+                    BackgroundColor="{StaticResource PrimaryColor}"
+                    TextColor="White"
+                    CornerRadius="10"
+                    Padding="14,8"
+                    VerticalOptions="Center" />
+        </Grid>
+
+        <!-- Індикатор початкового завантаження -->
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           Color="{StaticResource PrimaryColor}"
+                           HorizontalOptions="Center" />
+
+        <!-- Список фільмів із пагінацією та адаптивністю до орієнтації -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Movies}"
+                        RemainingItemsThreshold="3"
+                        RemainingItemsThresholdReachedCommand="{Binding LoadMoreMoviesCommand}"
+                        SelectionMode="None">
+
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                 Span="{Binding GridSpan}"
+                                 VerticalItemSpacing="10"
+                                 HorizontalItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:MovieModel">
+                    <Frame Padding="10"
+                           CornerRadius="14"
+                           BackgroundColor="White"
+                           BorderColor="#E2E8F0"
+                           HasShadow="True">
+                        <Grid ColumnDefinitions="92, *" ColumnSpacing="12">
+
+                            <!-- Постер фільму з кешуванням -->
+                            <Border Grid.Column="0"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    BackgroundColor="#E2E8F0"
+                                    HeightRequest="132"
+                                    WidthRequest="92"
+                                    VerticalOptions="Start">
+                                <Image Aspect="AspectFill"
+                                       HeightRequest="132"
+                                       WidthRequest="92">
+                                    <Image.Source>
+                                        <UriImageSource Uri="{Binding PosterUrl}"
+                                                        CachingEnabled="True"
+                                                        CacheValidity="3.00:00:00" />
+                                    </Image.Source>
+                                </Image>
+                            </Border>
+
+                            <!-- Коротка інформація про фільм -->
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding Title}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextColor}"
+                                       MaxLines="2"
+                                       LineBreakMode="TailTruncation" />
+
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="{Binding ReleaseYear, StringFormat='Рік: {0}'}"
+                                           FontSize="13"
+                                           TextColor="#475569"
+                                           FontAttributes="Bold" />
+                                    <Label Text="{Binding Rating}"
+                                           FontSize="13"
+                                           TextColor="#D97706"
+                                           FontAttributes="Bold" />
+                                </HorizontalStackLayout>
+
+                                <Label Text="{Binding Genres}"
+                                       FontSize="12"
+                                       TextColor="{StaticResource PrimaryColor}"
+                                       MaxLines="1"
+                                       LineBreakMode="TailTruncation" />
+
+                                <Label Text="{Binding Description}"
+                                       FontSize="12"
+                                       TextColor="#64748B"
+                                       MaxLines="3"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Індикатор довантаження при прокручуванні вниз -->
+        <HorizontalStackLayout Grid.Row="3"
+                               IsVisible="{Binding IsLoadingMore}"
+                               HorizontalOptions="Center"
+                               Spacing="8"
+                               Padding="4">
+            <ActivityIndicator IsRunning="{Binding IsLoadingMore}"
+                               Color="{StaticResource PrimaryColor}"
+                               HeightRequest="20"
+                               WidthRequest="20" />
+            <Label Text="Завантаження наступної сторінки..."
+                   FontSize="12"
+                   TextColor="#64748B"
+                   VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentPage>
